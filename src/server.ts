@@ -1,0 +1,20 @@
+import app from "./app";
+import config from "./config";
+import "dotenv/config";
+
+const PORT = config.port;
+
+
+async function main() {
+    try {
+        
+        app.listen(PORT, ()=>{
+            console.log(`server is running on port ${PORT}`)
+        })
+    } catch (error) {
+        console.log("Error starting the server: ",error);
+        process.exit(1);
+    }
+}
+
+main();
