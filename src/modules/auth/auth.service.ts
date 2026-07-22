@@ -27,7 +27,7 @@ const registerUser = async (payload: TRegisterUser) => {
       password: hashedPassword,
       phone: payload.phone,
       profileImage: payload.profileImage,
-      role: Role.TENANT,
+      role: payload.role,
     },
   });
 

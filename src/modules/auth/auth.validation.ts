@@ -5,7 +5,7 @@ const registerSchema = z.object({
     name: z
       .string()
       .min(2, "Name must be at least 2 characters long")
-      .max(30, "Name cannot exceed 50 characters"),
+      .max(30, "Name cannot exceed 30 characters"),
 
     email: z
       .string()
@@ -15,6 +15,14 @@ const registerSchema = z.object({
       .string()
       .min(8, "Password must be at least 8 characters long")
       .max(20, "Password cannot exceed 20 characters long"),
+
+    role: z.enum(["TENANT", "LANDLORD"], {
+      error: "Role must be TENANT or LANDLORD",
+    }),
+
+    phone: z.string().optional(),
+
+    profileImage: z.string().url().optional(),
   }),
 });
 
