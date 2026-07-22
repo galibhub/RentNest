@@ -6,6 +6,7 @@ import bcrypt from "bcryptjs";
 import { JwtPayload } from "jsonwebtoken";
 import { jwtUtils } from "../../utils/jwt";
 
+
 const registerUser = async (payload: TRegisterUser) => {
   const isUserExists = await prisma.user.findUnique({
     where: {
@@ -139,8 +140,10 @@ const refreshToken = async (refreshToken: string) => {
 };
 
 
+
 export const AuthService = {
   registerUser,
   loginUser,
-  refreshToken
+  refreshToken,
+  
 };
