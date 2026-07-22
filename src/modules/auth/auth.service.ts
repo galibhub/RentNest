@@ -42,23 +42,18 @@ const registerUser = async (payload: TRegisterUser) => {
 
 const loginUser = async (payload: TLoginUser) => {
   // Step 1: Find user by email
-  const user = await prisma.user.findUnique({
+  const user = await prisma.user.findUniqueOrThrow({
     where: {
       email: payload.email,
     },
   });
 
-  // Step 2: Check user exists
-  if (!user) {
-    throw new Error("User not found");
-  }
-
-  // Step 3: Check user status
+  // Step 2: Check user status
   if (user.status !== "ACTIVE") {
     throw new Error("User is not active");
   }
 
-  // Step 4: Compare password
+  // Step 3: Compare password
   const isPasswordMatched = await bcrypt.compare(
     payload.password,
     user.password,
@@ -68,28 +63,28 @@ const loginUser = async (payload: TLoginUser) => {
     throw new Error("Incorrect password");
   }
 
-  // Step 5: Create JWT Payload
+  // Step 4: Create JWT Payload
   const jwtPayload: JwtPayload = {
-    userId: user.id,
+    id: user.id,
     email: user.email,
     role: user.role,
   };
 
-  // Step 6: Generate Access Token
+  // Step 5: Generate Access Token
   const accessToken = jwtUtils.createToken(
     jwtPayload,
     config.jwt_access_secret,
     config.jwt_access_expires_in as any,
   );
 
-  // Step 7: Generate Refresh Token
+  // Step 6: Generate Refresh Token
   const refreshToken = jwtUtils.createToken(
     jwtPayload,
     config.jwt_refresh_secret,
     config.jwt_refresh_expires_in as any,
   );
 
-  // Step 8: Prepare user data
+  // Step 7: Prepare user data
   const userData = {
     id: user.id,
     name: user.name,
@@ -107,7 +102,45 @@ const loginUser = async (payload: TLoginUser) => {
   };
 };
 
+
+
+const refreshToken = async (refreshToken: string) => {
+  const decoded = jwtUtils.verifyToken(
+    refreshToken,
+    config.jwt_refresh_secret,
+  ) as JwtPayload;
+
+  const user = await prisma.user.findUniqueOrThrow({
+    where: {
+      id: decoded.id,
+    },
+  });
+
+
+  if (user.status !== "ACTIVE") {
+    throw new Error("User is not active");
+  }
+
+  const jwtPayload: JwtPayload = {
+    id: user.id,
+    email: user.email,
+    role: user.role,
+  };
+
+  const accessToken = jwtUtils.createToken(
+    jwtPayload,
+    config.jwt_access_secret,
+    config.jwt_access_expires_in as any,
+  );
+
+  return {
+    accessToken,
+  };
+};
+
+
 export const AuthService = {
   registerUser,
   loginUser,
+  refreshToken
 };
