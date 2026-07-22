@@ -21,6 +21,25 @@ const getMe = async (userId: string) => {
   return user;
 };
 
+const getAllUsers = async () => {
+  return prisma.user.findMany({
+    orderBy: {
+      createdAt: "desc",
+    },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      phone: true,
+      profileImage: true,
+      role: true,
+      status: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+};
+
 export const UserService = {
-  getMe,
+  getMe,getAllUsers
 };

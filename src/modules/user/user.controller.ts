@@ -20,6 +20,17 @@ const getMe = catchAsync(async (req, res) => {
   });
 });
 
+//get all user
+const getAllUsers = catchAsync(async (req, res) => {
+  const result = await UserService.getAllUsers();
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: "Users retrieved successfully",
+    data: result,
+  });
+});
 export const UserController = {
-  getMe,
+  getMe,getAllUsers 
 };
