@@ -94,6 +94,10 @@ const logoutUser = catchAsync(async (req, res) => {
 });
 
 
+
+
+
+
 export const AuthController = {
   registerUser,
   loginUser,
