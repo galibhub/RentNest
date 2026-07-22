@@ -1,45 +1,29 @@
 import { prisma } from "../../lib/prisma";
+import { userSelect } from "./user.constant";
 
+//getME
 const getMe = async (userId: string) => {
   const user = await prisma.user.findUniqueOrThrow({
     where: {
       id: userId,
     },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      phone: true,
-      profileImage: true,
-      role: true,
-      status: true,
-      createdAt: true,
-      updatedAt: true,
-    },
+    select: userSelect,
   });
 
   return user;
 };
 
+//get all user
 const getAllUsers = async () => {
   return prisma.user.findMany({
     orderBy: {
       createdAt: "desc",
     },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      phone: true,
-      profileImage: true,
-      role: true,
-      status: true,
-      createdAt: true,
-      updatedAt: true,
-    },
+    select: userSelect,
   });
 };
 
 export const UserService = {
-  getMe,getAllUsers
+  getMe,
+  getAllUsers,
 };
