@@ -3,6 +3,8 @@ import { prisma } from "../../lib/prisma";
 import { TRegisterUser, TLoginUser } from "./auth.interface";
 import { Role } from "../../../prisma/generated/prisma/enums";
 import bcrypt from "bcryptjs";
+import { JwtPayload } from "jsonwebtoken";
+import { jwtUtils } from "../../utils/jwt";
 
 const registerUser = async (payload: TRegisterUser) => {
   const isUserExists = await prisma.user.findUnique({
@@ -17,7 +19,7 @@ const registerUser = async (payload: TRegisterUser) => {
 
   const hashedPassword = await bcrypt.hash(
     payload.password,
-    Number(config.bcrypt_salt_rounds)
+    Number(config.bcrypt_salt_rounds),
   );
 
   const result = await prisma.user.create({
@@ -36,7 +38,74 @@ const registerUser = async (payload: TRegisterUser) => {
   return userWithoutPassword;
 };
 
-const loginUser = async (payload: TLoginUser) => {};
+//=========================> login user==================<
+
+const loginUser = async (payload: TLoginUser) => {
+  // Step 1: Find user by email
+  const user = await prisma.user.findUnique({
+    where: {
+      email: payload.email,
+    },
+  });
+
+  // Step 2: Check user exists
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  // Step 3: Check user status
+  if (user.status !== "ACTIVE") {
+    throw new Error("User is not active");
+  }
+
+  // Step 4: Compare password
+  const isPasswordMatched = await bcrypt.compare(
+    payload.password,
+    user.password,
+  );
+
+  if (!isPasswordMatched) {
+    throw new Error("Incorrect password");
+  }
+
+  // Step 5: Create JWT Payload
+  const jwtPayload: JwtPayload = {
+    userId: user.id,
+    email: user.email,
+    role: user.role,
+  };
+
+  // Step 6: Generate Access Token
+  const accessToken = jwtUtils.createToken(
+    jwtPayload,
+    config.jwt_access_secret,
+    config.jwt_access_expires_in as any,
+  );
+
+  // Step 7: Generate Refresh Token
+  const refreshToken = jwtUtils.createToken(
+    jwtPayload,
+    config.jwt_refresh_secret,
+    config.jwt_refresh_expires_in as any,
+  );
+
+  // Step 8: Prepare user data
+  const userData = {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    phone: user.phone,
+    profileImage: user.profileImage,
+    role: user.role,
+    status: user.status,
+  };
+
+  return {
+    accessToken,
+    refreshToken,
+    user: userData,
+  };
+};
 
 export const AuthService = {
   registerUser,
