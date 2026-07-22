@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const updateProfileValidationSchema = z.object({
+const updateProfileValidationSchema = z.object({
   body: z.object({
     name: z.string().min(2).optional(),
     phone: z.string().optional(),
@@ -8,8 +8,13 @@ export const updateProfileValidationSchema = z.object({
   }),
 });
 
-export const updateUserStatusValidationSchema = z.object({
+const updateUserStatusValidationSchema = z.object({
   body: z.object({
     status: z.enum(["ACTIVE", "BLOCKED"]),
   }),
 });
+
+export const UserValidation = {
+  updateProfileValidationSchema,
+  updateUserStatusValidationSchema,
+};

@@ -1,5 +1,6 @@
 import { prisma } from "../../lib/prisma";
 import { userSelect } from "./user.constant";
+import { TUpdateProfile } from "./user.interface";
 
 //getME
 const getMe = async (userId: string) => {
@@ -23,7 +24,33 @@ const getAllUsers = async () => {
   });
 };
 
+//update user 
+const updateProfile = async (
+  userId: string,
+  targetUserId: string,
+  payload: TUpdateProfile
+) => {
+  if (userId !== targetUserId) {
+    throw new Error("You are not allowed to update this profile");
+  }
+
+  await prisma.user.findUniqueOrThrow({
+    where: {
+      id: targetUserId,
+    },
+  });
+
+  return prisma.user.update({
+    where: {
+      id: targetUserId,
+    },
+    data: payload,
+    select: userSelect,
+  });
+};
+
 export const UserService = {
   getMe,
   getAllUsers,
+  updateProfile,
 };
